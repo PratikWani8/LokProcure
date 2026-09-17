@@ -1,0 +1,82 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    background-color: #f5f4f0;
+    color: #1e293b;
+    font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+}
+
+/* Custom crisp scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f5f4f0;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d8d5ca;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #b8b4a6;
+}
+
+/* Refined Enterprise Card Tokens */
+.enterprise-card {
+  background: #fbfbfa;
+  border: 1px solid #e8e6df;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.03);
+}
+
+.enterprise-card-interactive {
+  background: #fbfbfa;
+  border: 1px solid #e8e6df;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.03);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.enterprise-card-interactive:hover {
+  border-color: #d8d5ca;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.04);
+}
+
+.glass-card {
+  background: #fbfbfa;
+  border: 1px solid #e8e6df;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.03);
+}
+
+.glass-panel {
+  background: #f5f4f0;
+  border: 1px solid #e8e6df;
+}
+
+/* Primary and Ghost Button Tokens */
+.btn-primary {
+  @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-semibold tracking-wide shadow-sm transition-colors disabled:opacity-50 disabled:pointer-events-none cursor-pointer;
+}
+
+.btn-secondary {
+  @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-[#fbfbfa] hover:bg-[#f5f4f0] active:bg-[#e8e6df] text-slate-700 hover:text-slate-900 border border-[#e8e6df] text-xs font-medium tracking-wide shadow-sm transition-colors disabled:opacity-50 disabled:pointer-events-none cursor-pointer;
+}
+
+.btn-danger {
+  @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-rose-50 hover:bg-rose-100 active:bg-rose-200 text-rose-700 border border-rose-200 text-xs font-medium transition-colors disabled:opacity-50 cursor-pointer;
+}
+
+.btn-success {
+  @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-sm transition-colors disabled:opacity-50 cursor-pointer;
+}
