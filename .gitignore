@@ -19,6 +19,7 @@ backend/venv/
 *.sqlite
 *.sqlite3
 backend/generated_pos/
+backend/app/generated_pos/
 
 # Node
 node_modules/
