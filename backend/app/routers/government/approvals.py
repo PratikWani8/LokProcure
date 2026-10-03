@@ -147,11 +147,11 @@ def generate_po_pdf(
     # 1. Header Bar
     header_data = [
         [
-            Paragraph("<b>ProcureIQ</b> <font color='#3b82f6'>ERP</font>", title_style),
+            Paragraph("<b>LokProcure</b> <font color='#3b82f6'>ERP</font>", title_style),
             Paragraph(f"<b>PURCHASE ORDER</b><br/><font size=12 color='#2563eb'><b>{po_number}</b></font>", ParagraphStyle('RAlign', parent=title_style, alignment=2))
         ],
         [
-            Paragraph("NetSuite Integrated Intelligent Procurement System<br/>Zenesys Hackathon Edition 2026", subtitle_style),
+            Paragraph("NetSuite Integrated Intelligent Procurement System<br/>Hack 2 Ignite 2026", subtitle_style),
             Paragraph(f"<b>Issue Date:</b> {po.created_at.strftime('%B %d, %Y')}<br/><b>Status:</b> {po.status.upper()}", ParagraphStyle('RSub', parent=subtitle_style, alignment=2))
         ]
     ]
@@ -495,7 +495,7 @@ def update_po_status(
 
 @router.get("/po/{po_number}/download")
 def download_po_pdf(
-    po_number: str,
+    po_number: str, 
     db: Session = Depends(get_db)
 ):
     po = db.query(models.PurchaseOrder).filter(models.PurchaseOrder.po_number == po_number).first()
@@ -503,13 +503,12 @@ def download_po_pdf(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Purchase order {po_number} not found")
 
     pdf_path = os.path.join(GENERATED_POS_DIR, f"{po_number}.pdf")
-    if not os.path.exists(pdf_path):
-        # Regenerate on the fly
-        pr = po.purchase_request
-        vendor = po.vendor
-        wf = db.query(models.ApprovalWorkflow).filter(models.ApprovalWorkflow.pr_id == pr.id).first()
-        approver = wf.approver if wf else None
-        generate_po_pdf(po_number, po, pr, vendor, approver, wf)
+    # Always regenerate on the fly to ensure latest branding and current PO status
+    pr = po.purchase_request
+    vendor = po.vendor
+    wf = db.query(models.ApprovalWorkflow).filter(models.ApprovalWorkflow.pr_id == pr.id).order_by(models.ApprovalWorkflow.id.desc()).first() if pr else None
+    approver = wf.approver if wf else None
+    generate_po_pdf(po_number, po, pr, vendor, approver, wf)
 
     return FileResponse(
         pdf_path,
@@ -576,7 +575,7 @@ def get_netsuite_po_sync(
             },
             "orderStatus": po.status,
             "total": po.total_amount,
-            "memo": f"ProcureIQ AI Generated PO for PR-{pr.id:04d}: {pr.title}",
+            "memo": f"LokProcure AI Generated PO for PR-{pr.id:04d}: {pr.title}",
             "itemList": [
                 {
                     "item": pr.title,
