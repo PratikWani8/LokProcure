@@ -119,6 +119,6 @@ def health_check():
     return {
         "status": "healthy",
         "system": "LokProcure Enterprise ERP",
-        "database": "sqlite:///procureiq.db",
+        "database": "sqlite:///lokprocure.db",
         "timestamp": datetime.datetime.utcnow().isoformat(),
     }
