@@ -67,39 +67,46 @@ def seed_database():
         print("[INFO] Seeding User Personas...")
         users = [
             models.User(
-                email="admin@procureiq.internal",
+                email="admin@lokprocure.internal",
                 password_hash=auth.get_password_hash("admin123"),
                 full_name="Priya Sharma",
                 role="Lead Procurement Officer",
                 department="Supply Chain"
             ),
             models.User(
-                email="planthead@procureiq.internal",
+                email="planthead@lokprocure.internal",
                 password_hash=auth.get_password_hash("plant123"),
                 full_name="Rajesh Verma",
                 role="Plant Head",
                 department="Operations"
             ),
             models.User(
-                email="vpops@procureiq.internal",
+                email="vpops@lokprocure.internal",
                 password_hash=auth.get_password_hash("vp123"),
                 full_name="Kavita Reddy",
                 role="VP Operations",
                 department="Operations"
             ),
             models.User(
-                email="finance@procureiq.internal",
+                email="finance@lokprocure.internal",
                 password_hash=auth.get_password_hash("finance123"),
                 full_name="Arjun Patel",
                 role="Finance Director",
                 department="Finance"
             ),
             models.User(
-                email="deptmgr@procureiq.internal",
+                email="deptmgr@lokprocure.internal",
                 password_hash=auth.get_password_hash("dept123"),
                 full_name="Rohan Mehta",
                 role="Department Manager",
                 department="Engineering"
+            ),
+            models.User(
+                email="vendor@apex.internal",
+                password_hash=auth.get_password_hash("vendor123"),
+                full_name="Vikram Malhotra",
+                role="Vendor",
+                department="Apex Global Industrial"
             )
         ]
         db.add_all(users)
