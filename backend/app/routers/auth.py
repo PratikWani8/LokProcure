@@ -43,7 +43,9 @@ async def login(
             detail="Username (email) and password are required"
         )
 
-    user = db.query(models.User).filter(models.User.email == username.strip().lower()).first()
+    clean_email = username.strip().lower()
+    user = db.query(models.User).filter(models.User.email == clean_email).first()
+
     if not user or not auth.verify_password(password, user.password_hash):
         auth.record_failed_attempt(client_ip)
         raise HTTPException(
