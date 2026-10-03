@@ -16,11 +16,11 @@ import {
 } from 'lucide-react';
 
 const QUICK_ROLES = [
-  { role: 'Lead Procurement Officer', email: 'admin@procureiq.internal', pass: 'admin123', name: 'Priya Sharma' },
-  { role: 'Plant Head', email: 'planthead@procureiq.internal', pass: 'plant123', name: 'Rajesh Verma' },
-  { role: 'VP Operations', email: 'vpops@procureiq.internal', pass: 'vp123', name: 'Kavita Reddy' },
-  { role: 'Finance Director', email: 'finance@procureiq.internal', pass: 'finance123', name: 'Arjun Patel' },
-  { role: 'Department Manager', email: 'deptmgr@procureiq.internal', pass: 'dept123', name: 'Rohan Mehta' },
+  { role: 'Lead Procurement Officer', email: 'admin@lokprocure.internal', pass: 'admin123', name: 'Priya Sharma' },
+  { role: 'Plant Head', email: 'planthead@lokprocure.internal', pass: 'plant123', name: 'Rajesh Verma' },
+  { role: 'VP Operations', email: 'vpops@lokprocure.internal', pass: 'vp123', name: 'Kavita Reddy' },
+  { role: 'Finance Director', email: 'finance@lokprocure.internal', pass: 'finance123', name: 'Arjun Patel' },
+  { role: 'Department Manager', email: 'deptmgr@lokprocure.internal', pass: 'dept123', name: 'Rohan Mehta' },
 ];
 
 export default function Sidebar({
@@ -74,7 +74,7 @@ export default function Sidebar({
             </div>
             <div>
               <div className="flex items-center gap-1.5 leading-none">
-                <span className="font-bold text-sm text-slate-900 tracking-tight">ProcureIQ</span>
+                <span className="font-bold text-sm text-slate-900 tracking-tight">LokProcure</span>
                 <span className="text-[9px] uppercase font-mono tracking-wider px-1.5 py-0.5 rounded bg-[#f3f2ec] text-slate-600 border border-[#e8e6df] font-semibold">
                   ERP
                 </span>
