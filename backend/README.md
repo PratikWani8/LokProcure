@@ -97,7 +97,7 @@ backend/
 ├── seed_data.py
 ├── requirements.txt
 ├── .env
-├── procureiq.db
+├── lokprocure.db
 └── README.md
 ```
 
@@ -181,7 +181,7 @@ LokProcure currently uses **SQLite** with **SQLAlchemy**.
 The database file is:
 
 ```text
-procureiq.db
+lokprocure.db
 ```
 
 The database is initialized through the application's database configuration.
