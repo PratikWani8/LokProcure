@@ -11,10 +11,11 @@ from dotenv import load_dotenv
 from app.database import get_db
 from app import models, schemas
 
+load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env"))
 load_dotenv()
 
 SECRET_KEY = os.getenv("SECRET_KEY")
-if not SECRET_KEY or SECRET_KEY == "procureiq-zenesys-2026-secret-key-hackathon":
+if not SECRET_KEY or SECRET_KEY == "lokprocure-hack2ignite-2026-secret-key":
     raise ValueError("FATAL: SECRET_KEY environment variable is not securely set.")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60  # 60 minutes
