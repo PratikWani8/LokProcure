@@ -6,7 +6,7 @@ const DEMO_PERSONAS = [
   {
     role: 'Lead Procurement Officer',
     name: 'Priya Sharma',
-    email: 'admin@procureiq.internal',
+    email: 'admin@lokprocure.internal',
     password: 'admin123',
     department: 'Supply Chain',
     desc: 'Full Procurement authority, RFQ panel management & PO release',
@@ -15,7 +15,7 @@ const DEMO_PERSONAS = [
   {
     role: 'Plant Head',
     name: 'Rajesh Verma',
-    email: 'planthead@procureiq.internal',
+    email: 'planthead@lokprocure.internal',
     password: 'plant123',
     department: 'Operations',
     desc: 'Approver for Rule 1: Operations CapEx > ₹1,00,000',
@@ -24,7 +24,7 @@ const DEMO_PERSONAS = [
   {
     role: 'VP Operations',
     name: 'Kavita Reddy',
-    email: 'vpops@procureiq.internal',
+    email: 'vpops@lokprocure.internal',
     password: 'vp123',
     department: 'Operations',
     desc: 'Approver for Rule 2: Critical Urgency & Bulk Quantity > 500',
@@ -33,7 +33,7 @@ const DEMO_PERSONAS = [
   {
     role: 'Finance Director',
     name: 'Arjun Patel',
-    email: 'finance@procureiq.internal',
+    email: 'finance@lokprocure.internal',
     password: 'finance123',
     department: 'Finance',
     desc: 'Approver for Rule 3: High Value Purchase > ₹50,000',
@@ -42,7 +42,7 @@ const DEMO_PERSONAS = [
   {
     role: 'Department Manager',
     name: 'Rohan Mehta',
-    email: 'deptmgr@procureiq.internal',
+    email: 'deptmgr@lokprocure.internal',
     password: 'dept123',
     department: 'Engineering',
     desc: 'Approver for Rule 4: Standard Departmental PRs',
@@ -60,7 +60,7 @@ const DEMO_PERSONAS = [
 ];
 
 export default function Login({ onLoginSuccess }) {
-  const [email, setEmail] = useState('admin@procureiq.internal');
+  const [email, setEmail] = useState('admin@lokprocure.internal');
   const [password, setPassword] = useState('admin123');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -166,7 +166,7 @@ export default function Login({ onLoginSuccess }) {
                 <button
                   type="button"
                   onClick={() => {
-                    setEmail('admin@procureiq.internal');
+                    setEmail('admin@lokprocure.internal');
                     setPassword('admin123');
                   }}
                   className={`py-1.5 text-xs font-semibold rounded-md transition-all cursor-pointer ${
@@ -210,7 +210,7 @@ export default function Login({ onLoginSuccess }) {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
-                      placeholder="name@procureiq.internal"
+                      placeholder="name@lokprocure.internal"
                       className="w-full bg-white/85 focus:bg-white border border-stone-300/80 focus:border-amber-600 rounded-lg pl-9 pr-3.5 py-2 text-xs text-stone-900 placeholder-stone-400 focus:outline-none transition-all shadow-xs"
                     />
                   </div>
