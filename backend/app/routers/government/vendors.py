@@ -7,9 +7,10 @@ import logging
 from typing import Any, Dict, List, Optional
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
+from app import auth, models, schemas
 from app.auth import require_gov_role
 from app.database import get_db
 from app.models import (
@@ -23,6 +24,8 @@ from app.models import (
     VendorBid,
     VendorNegotiationState,
     VendorPerformance,
+    VendorRegistration,
+    User,
 )
 from app.negotiation.graph import run_bilateral_negotiation
 from app.negotiation.state import GraphNegotiationState
@@ -38,6 +41,8 @@ from app.schemas import (
     VendorNegotiationResultOut,
     VendorOut,
     VendorRecommendation,
+    VendorRegistrationOut,
+    VendorRegistrationActionIn,
 )
 
 logger = logging.getLogger("routers.vendors")
@@ -1234,3 +1239,181 @@ def resume_negotiation_endpoint(
         escalated=final_status in ["PENDING_GOV_APPROVAL", "PENDING_VENDOR_APPROVAL", "PENDING_APPROVAL"],
         sessions=[session],
     )
+
+
+# ==============================================================================
+# VENDOR REGISTRATION & VERIFICATION QUEUE (LEAD PROCUREMENT OFFICER)
+# ==============================================================================
+
+@router.get("/registrations", response_model=List[schemas.VendorRegistrationOut])
+def list_vendor_registrations(
+    status_filter: Optional[str] = Query(None, description="Filter: PENDING_VERIFICATION, APPROVED, REJECTED, ALL"),
+    search: Optional[str] = Query(None, description="Search company name, GSTIN, PAN, or contact"),
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """Returns vendor registration applications for review."""
+    query = db.query(models.VendorRegistration)
+    if status_filter and status_filter.upper() != "ALL":
+        query = query.filter(models.VendorRegistration.status == status_filter.upper())
+    if search:
+        s = f"%{search.strip()}%"
+        query = query.filter(
+            (models.VendorRegistration.company_name.ilike(s)) |
+            (models.VendorRegistration.gstin.ilike(s)) |
+            (models.VendorRegistration.pan.ilike(s)) |
+            (models.VendorRegistration.contact_person.ilike(s)) |
+            (models.VendorRegistration.application_number.ilike(s))
+        )
+    return query.order_by(models.VendorRegistration.created_at.desc()).all()
+
+
+@router.get("/registrations/{reg_id}", response_model=schemas.VendorRegistrationOut)
+def get_vendor_registration(
+    reg_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """Returns details and verification matrix of a specific vendor registration application."""
+    reg = db.query(models.VendorRegistration).filter(models.VendorRegistration.id == reg_id).first()
+    if not reg:
+        raise HTTPException(status_code=404, detail="Vendor registration application not found")
+    return reg
+
+
+@router.post("/registrations/{reg_id}/accept")
+def accept_vendor_registration(
+    reg_id: int,
+    action: schemas.VendorRegistrationActionIn,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.require_roles("Lead Procurement Officer"))
+):
+    """
+    Lead Procurement Officer accepts and authorizes the vendor registration on the DB.
+    Activates the vendor in the supplier directory, creates/activates the vendor User account,
+    and sets registration status to APPROVED.
+    """
+    reg = db.query(models.VendorRegistration).filter(models.VendorRegistration.id == reg_id).first()
+    if not reg:
+        raise HTTPException(status_code=404, detail="Vendor registration application not found")
+
+    tier = action.pricing_tier or reg.assigned_tier or "Standard"
+    rel_score = float(action.initial_reliability_score or 92.0)
+    now = datetime.utcnow()
+
+    # 1. Update VendorRegistration record
+    reg.status = "APPROVED"
+    reg.reviewer_id = current_user.id
+    reg.reviewer_notes = action.comment or f"Accepted and verified on DB by Lead Procurement Officer {current_user.full_name}"
+    reg.assigned_tier = tier
+    reg.actioned_at = now
+
+    # 2. Check if a Vendor record already exists or create new
+    vendor = db.query(models.Vendor).filter(
+        (models.Vendor.name == reg.company_name) |
+        (models.Vendor.contact_email == reg.email)
+    ).first()
+
+    if not vendor:
+        vendor = models.Vendor(
+            name=reg.company_name,
+            contact_email=reg.email,
+            phone=reg.phone,
+            avg_delivery_days=reg.avg_delivery_days,
+            reliability_score=rel_score,
+            pricing_tier=tier,
+            specialties=reg.specialties or reg.category,
+            status="Active",
+            is_local_vendor=(reg.local_proximity_km <= 50.0),
+            is_incubator=reg.is_incubator,
+            local_proximity_km=reg.local_proximity_km,
+            gstin=reg.gstin,
+            pan=reg.pan,
+            business_type=reg.business_type,
+            city=reg.city,
+            state=reg.state
+        )
+        db.add(vendor)
+        db.flush()
+    else:
+        vendor.status = "Active"
+        vendor.pricing_tier = tier
+        vendor.reliability_score = rel_score
+        vendor.gstin = reg.gstin
+        vendor.pan = reg.pan
+        vendor.business_type = reg.business_type
+        vendor.city = reg.city
+        vendor.state = reg.state
+
+    # 3. Activate associated User account
+    user = db.query(models.User).filter(models.User.email == reg.email).first()
+    if user:
+        user.is_active = True
+        user.department = vendor.name
+        user.vendor_id = vendor.id
+        user.role = "Vendor"
+    else:
+        user = models.User(
+            email=reg.email,
+            password_hash=reg.password_hash,
+            full_name=reg.contact_person,
+            role="Vendor",
+            department=vendor.name,
+            is_active=True,
+            vendor_id=vendor.id
+        )
+        db.add(user)
+        db.flush()
+
+    reg.vendor_id = vendor.id
+    reg.user_id = user.id
+
+    db.commit()
+    db.refresh(reg)
+    db.refresh(vendor)
+
+    return {
+        "message": f"Vendor '{vendor.name}' successfully accepted, verified, and activated on LokProcure database!",
+        "application_number": reg.application_number,
+        "vendor_id": vendor.id,
+        "vendor_name": vendor.name,
+        "status": vendor.status,
+        "pricing_tier": vendor.pricing_tier,
+        "reliability_score": vendor.reliability_score
+    }
+
+
+@router.post("/registrations/{reg_id}/reject")
+def reject_vendor_registration(
+    reg_id: int,
+    action: schemas.VendorRegistrationActionIn,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.require_roles("Lead Procurement Officer"))
+):
+    """
+    Lead Procurement Officer rejects the vendor registration application.
+    """
+    reg = db.query(models.VendorRegistration).filter(models.VendorRegistration.id == reg_id).first()
+    if not reg:
+        raise HTTPException(status_code=404, detail="Vendor registration application not found")
+
+    reg.status = "REJECTED"
+    reg.reviewer_id = current_user.id
+    reg.reviewer_notes = action.comment or "Application does not meet current statutory procurement criteria."
+    reg.actioned_at = datetime.utcnow()
+
+    # Deactivate user account
+    user = db.query(models.User).filter(models.User.email == reg.email).first()
+    if user:
+        user.is_active = False
+
+    db.commit()
+    db.refresh(reg)
+
+    return {
+        "message": f"Vendor registration '{reg.application_number}' rejected.",
+        "application_number": reg.application_number,
+        "status": reg.status,
+        "reviewer_notes": reg.reviewer_notes
+    }
+
