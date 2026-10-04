@@ -25,6 +25,8 @@ class User(Base):
     full_name = Column(String(255), nullable=False)
     role = Column(String(100), nullable=False)
     department = Column(String(100), nullable=False)
+    is_active = Column(Boolean, default=True, nullable=False)
+    vendor_id = Column(Integer, ForeignKey("vendors.id"), nullable=True)
 
     purchase_requests = relationship(
         "PurchaseRequest",
@@ -53,6 +55,11 @@ class Vendor(Base):
     is_local_vendor = Column(Boolean, default=False, nullable=True)
     is_incubator = Column(Boolean, default=False, nullable=True)
     local_proximity_km = Column(Float, default=15.0, nullable=True)
+    gstin = Column(String(20), nullable=True)
+    pan = Column(String(20), nullable=True)
+    business_type = Column(String(100), nullable=True)
+    city = Column(String(100), nullable=True)
+    state = Column(String(100), nullable=True)
 
     bids = relationship(
         "VendorBid",
@@ -363,3 +370,63 @@ class NegotiationEscalation(Base):
 
     negotiation_session = relationship("NegotiationSession", back_populates="escalations")
     approver = relationship("User", foreign_keys=[approver_id])
+
+
+class VendorRegistration(Base):
+    __tablename__ = "vendor_registrations"
+
+    id = Column(Integer, primary_key=True, index=True)
+    application_number = Column(String(50), unique=True, index=True, nullable=False)
+    company_name = Column(String(255), nullable=False)
+    business_type = Column(String(100), nullable=False)
+    cin_llpin = Column(String(50), nullable=True)
+    contact_person = Column(String(255), nullable=False)
+    email = Column(String(255), unique=True, index=True, nullable=False)
+    phone = Column(String(50), nullable=False)
+    address = Column(Text, nullable=False)
+    city = Column(String(100), nullable=False)
+    state = Column(String(100), nullable=False)
+    pincode = Column(String(20), nullable=False)
+
+    gstin = Column(String(20), nullable=False)
+    pan = Column(String(20), nullable=False)
+    is_msme = Column(Boolean, default=False, nullable=False)
+    msme_reg_no = Column(String(50), nullable=True)
+    is_incubator = Column(Boolean, default=False, nullable=False)
+
+    category = Column(String(100), nullable=False)
+    specialties = Column(Text, nullable=True)
+    annual_turnover = Column(Float, default=0.0, nullable=False)
+    avg_delivery_days = Column(Integer, default=7, nullable=False)
+    local_proximity_km = Column(Float, default=15.0, nullable=False)
+    quality_certifications = Column(String(255), nullable=True)
+
+    bank_account_number = Column(String(50), nullable=False)
+    bank_ifsc = Column(String(20), nullable=False)
+    bank_name = Column(String(100), nullable=False)
+
+    password_hash = Column(String(255), nullable=False)
+
+    # Verification & Audit data
+    status = Column(String(50), default="PENDING_VERIFICATION", nullable=False)  # PENDING_VERIFICATION, APPROVED, REJECTED
+    verification_score = Column(Float, default=0.0, nullable=False)
+    verification_risk_level = Column(String(50), default="Low", nullable=False)
+    verification_flags_json = Column(Text, default="[]", nullable=False)
+    ai_verification_summary = Column(Text, nullable=True)
+
+    # Reviewer details
+    reviewer_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    reviewer_notes = Column(Text, nullable=True)
+    assigned_tier = Column(String(50), default="Standard", nullable=True)
+
+    created_at = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
+    actioned_at = Column(DateTime, nullable=True)
+
+    # Linked entities after acceptance
+    vendor_id = Column(Integer, ForeignKey("vendors.id"), nullable=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+
+    reviewer = relationship("User", foreign_keys=[reviewer_id])
+    vendor = relationship("Vendor", foreign_keys=[vendor_id])
+    user = relationship("User", foreign_keys=[user_id])
+
