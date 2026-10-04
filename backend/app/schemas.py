@@ -34,6 +34,95 @@ class VendorOut(BaseModel):
     pricing_tier: str
     reliability_score: float
     avg_delivery_days: int
+    contact_email: Optional[str] = None
+    phone: Optional[str] = None
+    status: Optional[str] = "Active"
+    is_local_vendor: Optional[bool] = False
+    is_incubator: Optional[bool] = False
+    local_proximity_km: Optional[float] = 15.0
+    gstin: Optional[str] = None
+    pan: Optional[str] = None
+    business_type: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+
+
+class VendorRegisterIn(BaseModel):
+    company_name: str
+    business_type: str = "Private Limited"
+    cin_llpin: Optional[str] = None
+    contact_person: str
+    email: str
+    phone: str
+    address: str
+    city: str
+    state: str
+    pincode: str
+    gstin: str
+    pan: str
+    is_msme: bool = False
+    msme_reg_no: Optional[str] = None
+    is_incubator: bool = False
+    category: str = "Industrial Equipment"
+    specialties: Optional[str] = None
+    annual_turnover: float = 0.0
+    avg_delivery_days: int = 7
+    local_proximity_km: float = 15.0
+    quality_certifications: Optional[str] = None
+    bank_account_number: str
+    bank_ifsc: str
+    bank_name: str
+    password: str
+
+
+class VendorRegistrationOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    application_number: str
+    company_name: str
+    business_type: str
+    cin_llpin: Optional[str] = None
+    contact_person: str
+    email: str
+    phone: str
+    address: str
+    city: str
+    state: str
+    pincode: str
+    gstin: str
+    pan: str
+    is_msme: bool
+    msme_reg_no: Optional[str] = None
+    is_incubator: bool
+    category: str
+    specialties: Optional[str] = None
+    annual_turnover: float
+    avg_delivery_days: int
+    local_proximity_km: float
+    quality_certifications: Optional[str] = None
+    bank_account_number: str
+    bank_ifsc: str
+    bank_name: str
+    status: str
+    verification_score: float
+    verification_risk_level: str
+    verification_flags_json: Optional[str] = "[]"
+    ai_verification_summary: Optional[str] = None
+    reviewer_id: Optional[int] = None
+    reviewer_notes: Optional[str] = None
+    assigned_tier: Optional[str] = "Standard"
+    created_at: datetime
+    actioned_at: Optional[datetime] = None
+    vendor_id: Optional[int] = None
+    user_id: Optional[int] = None
+
+
+class VendorRegistrationActionIn(BaseModel):
+    decision: Literal["APPROVE", "REJECT"]
+    pricing_tier: Optional[str] = "Standard"
+    initial_reliability_score: Optional[float] = 92.0
+    comment: Optional[str] = None
 
 
 class VendorBidOut(BaseModel):
