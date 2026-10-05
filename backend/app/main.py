@@ -16,6 +16,10 @@ Base.metadata.create_all(bind=engine)
 
 with engine.connect() as conn:
     patches = {
+        "users": [
+            ("is_active", "BOOLEAN DEFAULT 1"),
+            ("vendor_id", "INTEGER"),
+        ],
         "vendor_bids": [
             ("original_quoted_price", "FLOAT"),
             ("original_delivery_days", "INTEGER"),
@@ -24,6 +28,11 @@ with engine.connect() as conn:
             ("is_local_vendor", "BOOLEAN"),
             ("is_incubator", "BOOLEAN"),
             ("local_proximity_km", "FLOAT"),
+            ("gstin", "VARCHAR(20)"),
+            ("pan", "VARCHAR(20)"),
+            ("business_type", "VARCHAR(100)"),
+            ("city", "VARCHAR(100)"),
+            ("state", "VARCHAR(100)"),
         ],
         "purchase_orders": [
             ("netsuite_internal_id", "VARCHAR(50)"),
