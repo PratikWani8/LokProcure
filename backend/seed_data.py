@@ -60,6 +60,7 @@ def seed_database():
             db.query(models.VendorBid).delete()
             db.query(models.PurchaseRequest).delete()
             db.query(models.VendorPerformance).delete()
+            db.query(models.VendorRegistration).delete()
             db.query(models.Vendor).delete()
             db.query(models.User).delete()
             db.commit()
@@ -452,6 +453,225 @@ def seed_database():
                 required_action=comp_res.get("required_action", "")
             )
             db.add(c_check)
+        db.commit()
+
+        # Seed Sample Vendor Registrations for Lead Procurement Officer Review & Acceptance
+        print("[INFO] Seeding Vendor Registration Applications (Pending & Approved)...")
+        from app.vendor_verification import audit_vendor_registration
+
+        # 1. Hyperion Precision Dynamics Ltd (Pending Review)
+        hyperion_payload = {
+            "company_name": "Hyperion Precision Dynamics Ltd",
+            "business_type": "Private Limited",
+            "cin_llpin": "U29253MH2021PTC364120",
+            "contact_person": "Sunil Nambiar",
+            "email": "sunil@hyperion.internal",
+            "phone": "+91 98201 54321",
+            "address": "Plot 42, MIDC Electronic Zone, Mahape",
+            "city": "Navi Mumbai",
+            "state": "Maharashtra",
+            "pincode": "400710",
+            "gstin": "27AABCH1234F1Z5",
+            "pan": "AABCH1234F",
+            "is_msme": True,
+            "msme_reg_no": "UDYAM-MH-01-0029381",
+            "is_incubator": False,
+            "category": "Industrial Robotics & Automation",
+            "specialties": "Conveyor Actuators, High-Torque Servo Drives, Collaborative Robotic Arms",
+            "annual_turnover": 45000000.0,
+            "avg_delivery_days": 5,
+            "local_proximity_km": 12.5,
+            "quality_certifications": "ISO 9001:2015, CE Marking, BIS Standard",
+            "bank_account_number": "50100234567890",
+            "bank_ifsc": "HDFC0001234",
+            "bank_name": "HDFC Bank Ltd",
+            "password": "vendor123"
+        }
+        hyp_audit = audit_vendor_registration(hyperion_payload)
+        hyp_pwd = auth.get_password_hash("vendor123")
+        hyp_user = models.User(
+            email="sunil@hyperion.internal",
+            password_hash=hyp_pwd,
+            full_name="Sunil Nambiar",
+            role="Vendor",
+            department="Hyperion Precision Dynamics Ltd",
+            is_active=False
+        )
+        db.add(hyp_user)
+        db.flush()
+
+        reg1 = models.VendorRegistration(
+            application_number="VREG-2026-HYP01",
+            company_name="Hyperion Precision Dynamics Ltd",
+            business_type="Private Limited",
+            cin_llpin="U29253MH2021PTC364120",
+            contact_person="Sunil Nambiar",
+            email="sunil@hyperion.internal",
+            phone="+91 98201 54321",
+            address="Plot 42, MIDC Electronic Zone, Mahape",
+            city="Navi Mumbai",
+            state="Maharashtra",
+            pincode="400710",
+            gstin="27AABCH1234F1Z5",
+            pan="AABCH1234F",
+            is_msme=True,
+            msme_reg_no="UDYAM-MH-01-0029381",
+            is_incubator=False,
+            category="Industrial Robotics & Automation",
+            specialties="Conveyor Actuators, High-Torque Servo Drives, Collaborative Robotic Arms",
+            annual_turnover=45000000.0,
+            avg_delivery_days=5,
+            local_proximity_km=12.5,
+            quality_certifications="ISO 9001:2015, CE Marking, BIS Standard",
+            bank_account_number="50100234567890",
+            bank_ifsc="HDFC0001234",
+            bank_name="HDFC Bank Ltd",
+            password_hash=hyp_pwd,
+            status="PENDING_VERIFICATION",
+            verification_score=hyp_audit["verification_score"],
+            verification_risk_level=hyp_audit["verification_risk_level"],
+            verification_flags_json=json.dumps(hyp_audit["verification_flags"]),
+            ai_verification_summary=json.dumps(hyp_audit["ai_summary"]),
+            user_id=hyp_user.id
+        )
+        db.add(reg1)
+
+        # 2. GreenVolt Energy Technologies (Pending Review)
+        greenvolt_payload = {
+            "company_name": "GreenVolt Energy Technologies",
+            "business_type": "Partnership / LLP",
+            "cin_llpin": "AAY-4921",
+            "contact_person": "Dr. Ananya Sen",
+            "email": "ananya@greenvolt.internal",
+            "phone": "+91 98302 98765",
+            "address": "Tech Innovation Park, Sector V, Salt Lake",
+            "city": "Kolkata",
+            "state": "West Bengal",
+            "pincode": "700091",
+            "gstin": "19AABFG5678K1Z3",
+            "pan": "AABFG5678K",
+            "is_msme": True,
+            "msme_reg_no": "UDYAM-WB-10-0018472",
+            "is_incubator": True,
+            "category": "Renewable Energy & Battery Storage",
+            "specialties": "Lithium-Ferro Industrial Storage, Solar Microgrid Inverters",
+            "annual_turnover": 18000000.0,
+            "avg_delivery_days": 6,
+            "local_proximity_km": 22.0,
+            "quality_certifications": "ISO 14001:2015, BIS Standard",
+            "bank_account_number": "918020034561234",
+            "bank_ifsc": "UTIB0000123",
+            "bank_name": "Axis Bank Ltd",
+            "password": "vendor123"
+        }
+        gv_audit = audit_vendor_registration(greenvolt_payload)
+        gv_pwd = auth.get_password_hash("vendor123")
+        gv_user = models.User(
+            email="ananya@greenvolt.internal",
+            password_hash=gv_pwd,
+            full_name="Dr. Ananya Sen",
+            role="Vendor",
+            department="GreenVolt Energy Technologies",
+            is_active=False
+        )
+        db.add(gv_user)
+        db.flush()
+
+        reg2 = models.VendorRegistration(
+            application_number="VREG-2026-GV02",
+            company_name="GreenVolt Energy Technologies",
+            business_type="Partnership / LLP",
+            cin_llpin="AAY-4921",
+            contact_person="Dr. Ananya Sen",
+            email="ananya@greenvolt.internal",
+            phone="+91 98302 98765",
+            address="Tech Innovation Park, Sector V, Salt Lake",
+            city="Kolkata",
+            state="West Bengal",
+            pincode="700091",
+            gstin="19AABFG5678K1Z3",
+            pan="AABFG5678K",
+            is_msme=True,
+            msme_reg_no="UDYAM-WB-10-0018472",
+            is_incubator=True,
+            category="Renewable Energy & Battery Storage",
+            specialties="Lithium-Ferro Industrial Storage, Solar Microgrid Inverters",
+            annual_turnover=18000000.0,
+            avg_delivery_days=6,
+            local_proximity_km=22.0,
+            quality_certifications="ISO 14001:2015, BIS Standard",
+            bank_account_number="918020034561234",
+            bank_ifsc="UTIB0000123",
+            bank_name="Axis Bank Ltd",
+            password_hash=gv_pwd,
+            status="PENDING_VERIFICATION",
+            verification_score=gv_audit["verification_score"],
+            verification_risk_level=gv_audit["verification_risk_level"],
+            verification_flags_json=json.dumps(gv_audit["verification_flags"]),
+            ai_verification_summary=json.dumps(gv_audit["ai_summary"]),
+            user_id=gv_user.id
+        )
+        db.add(reg2)
+
+        # 3. Apex Global Industrial (Already Approved)
+        lead_officer = db.query(models.User).filter(models.User.role == "Lead Procurement Officer").first()
+        apex_v = db.query(models.Vendor).filter(models.Vendor.name == "Apex Global Industrial").first()
+        apex_u = db.query(models.User).filter(models.User.email == "vendor@apex.internal").first()
+        if apex_v and apex_u:
+            apex_u.is_active = True
+            apex_u.vendor_id = apex_v.id
+            apex_v.gstin = "27AAACA1234D1Z2"
+            apex_v.pan = "AAACA1234D"
+            apex_v.business_type = "Public Limited"
+            apex_v.city = "Mumbai"
+            apex_v.state = "Maharashtra"
+
+            reg3 = models.VendorRegistration(
+                application_number="VREG-2026-APX00",
+                company_name="Apex Global Industrial",
+                business_type="Public Limited",
+                cin_llpin="L29100MH1998PLC115432",
+                contact_person="Vikram Malhotra",
+                email="vendor@apex.internal",
+                phone="+1 (800) 555-0191",
+                address="Apex Corporate Towers, Bandra Kurla Complex",
+                city="Mumbai",
+                state="Maharashtra",
+                pincode="400051",
+                gstin="27AAACA1234D1Z2",
+                pan="AAACA1234D",
+                is_msme=False,
+                is_incubator=False,
+                category="Heavy Machinery & Plant Automation",
+                specialties="Heavy Industrial Machinery, Plant Automation & Safety Systems",
+                annual_turnover=150000000.0,
+                avg_delivery_days=3,
+                local_proximity_km=15.0,
+                quality_certifications="ISO 9001:2015, ISO 14001, OHSAS 18001",
+                bank_account_number="10023456789123",
+                bank_ifsc="SBIN0001234",
+                bank_name="State Bank of India",
+                password_hash=apex_u.password_hash,
+                status="APPROVED",
+                verification_score=98.0,
+                verification_risk_level="Low",
+                verification_flags_json="[]",
+                ai_verification_summary=json.dumps({
+                    "executive_summary": "Apex Global Industrial is a premier certified enterprise tier-1 supplier with flawless tax credentials and ISO compliance.",
+                    "key_strengths": ["Enterprise Tier-1 rating", "Verified GSTIN-PAN tax linkage", "High-capacity plant infrastructure"],
+                    "risk_flags": [],
+                    "recommendation": "RECOMMENDED_APPROVAL",
+                    "suggested_tier": "Enterprise Tier-1"
+                }),
+                reviewer_id=lead_officer.id if lead_officer else None,
+                reviewer_notes="Authorized by Lead Procurement Officer during annual vendor empanelment.",
+                assigned_tier="Enterprise Tier-1",
+                actioned_at=datetime.datetime.utcnow(),
+                vendor_id=apex_v.id,
+                user_id=apex_u.id
+            )
+            db.add(reg3)
+
         db.commit()
 
         print("[SUCCESS] Database seeding completed successfully!")
