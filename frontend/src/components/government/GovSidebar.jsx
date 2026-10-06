@@ -12,7 +12,8 @@ import {
   Gavel,
   MessageSquare,
   TrendingUp,
-  Briefcase
+  Briefcase,
+  ShieldCheck
 } from 'lucide-react';
 
 const QUICK_ROLES = [
@@ -30,7 +31,8 @@ export default function GovSidebar({
   user,
   onLogout,
   onSwitchPersona,
-  pendingCount = 0
+  pendingCount = 0,
+  pendingVendorsCount = 0
 }) {
   const [showPersonaMenu, setShowPersonaMenu] = useState(false);
 
@@ -70,6 +72,12 @@ export default function GovSidebar({
       label: 'Approvals',
       icon: CheckSquare,
       badge: pendingCount > 0 ? `${pendingCount} Pending` : null,
+    },
+    {
+      id: 'vendor_registrations',
+      label: 'Vendor Empanelment',
+      icon: ShieldCheck,
+      badge: pendingVendorsCount > 0 ? `${pendingVendorsCount} New` : null,
     },
     {
       id: 'purchase_orders',
