@@ -11,6 +11,7 @@ import PurchaseRequestForm from './components/PurchaseRequestForm';
 import VendorComparison from './components/VendorComparison';
 import ApprovalQueue from './components/ApprovalQueue';
 import PurchaseOrders from './components/PurchaseOrders';
+import VendorRegistrations from './components/government/VendorRegistrations';
 
 // Vendor Portal Components
 import VendorSidebar from './components/vendor/VendorSidebar';
@@ -20,7 +21,7 @@ import VendorMyBids from './components/vendor/VendorMyBids';
 import VendorNegotiations from './components/vendor/VendorNegotiations';
 import VendorAwardedOrders from './components/vendor/VendorAwardedOrders';
 
-import { authAPI, approvalsAPI, vendorPortalAPI } from './api';
+import { authAPI, approvalsAPI, vendorPortalAPI, vendorRegistrationAPI } from './api';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
 
 export default function App() {
@@ -30,6 +31,7 @@ export default function App() {
   const [selectedPrId, setSelectedPrId] = useState(null);
   const [orderToBid, setOrderToBid] = useState(null);
   const [pendingApprovalsCount, setPendingApprovalsCount] = useState(0);
+  const [pendingVendorsCount, setPendingVendorsCount] = useState(0);
   const [vendorBidsCount, setVendorBidsCount] = useState(0);
   const [toast, setToast] = useState(null);
   const [authChecking, setAuthChecking] = useState(true);
@@ -37,7 +39,7 @@ export default function App() {
   const isVendor = user?.role === 'Vendor';
 
   const VENDOR_TABS = ['vendor_dashboard', 'vendor_active_orders', 'vendor_my_bids', 'vendor_negotiations', 'vendor_awarded_orders'];
-  const GOV_TABS = ['dashboard', 'orders', 'new_pr', 'purchase_requests', 'active_bids', 'vendor_comparison', 'negotiations', 'approval_queue', 'purchase_orders'];
+  const GOV_TABS = ['dashboard', 'orders', 'new_pr', 'purchase_requests', 'active_bids', 'vendor_comparison', 'negotiations', 'approval_queue', 'vendor_registrations', 'purchase_orders'];
 
   const effectiveTab = isVendor
     ? (VENDOR_TABS.includes(activeTab) ? activeTab : 'vendor_dashboard')
@@ -59,6 +61,12 @@ export default function App() {
       } else {
         const queue = await approvalsAPI.getQueue('Pending');
         setPendingApprovalsCount(Array.isArray(queue) ? queue.length : 0);
+        try {
+          const regs = await vendorRegistrationAPI.getRegistrations('PENDING_VERIFICATION');
+          setPendingVendorsCount(Array.isArray(regs) ? regs.length : 0);
+        } catch (e) {
+          // ignore
+        }
       }
     } catch (err) {
       // Ignore background badge fetch errors
@@ -244,6 +252,7 @@ export default function App() {
             onLogout={handleLogout}
             onSwitchPersona={handleSwitchPersona}
             pendingCount={pendingApprovalsCount}
+            pendingVendorsCount={pendingVendorsCount}
           />
 
           <main className="flex-1 min-w-0 overflow-y-auto h-screen">
@@ -316,6 +325,13 @@ export default function App() {
                   setActiveTab('vendor_comparison');
                 }}
                 onPoGenerated={handlePoGenerated}
+              />
+            )}
+
+            {effectiveTab === 'vendor_registrations' && (
+              <VendorRegistrations
+                user={user}
+                onNavigateToTab={setActiveTab}
               />
             )}
 
