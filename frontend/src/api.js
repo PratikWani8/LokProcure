@@ -243,4 +243,31 @@ export const dashboardAPI = {
   },
 };
 
+// --- VENDOR REGISTRATION & VERIFICATION API ---
+export const vendorRegistrationAPI = {
+  register: async (registrationData) => {
+    const response = await api.post('/auth/register-vendor', registrationData);
+    return response.data;
+  },
+  getRegistrations: async (statusFilter, search) => {
+    const params = {};
+    if (statusFilter) params.status_filter = statusFilter;
+    if (search) params.search = search;
+    const response = await api.get('/gov/vendors/registrations', { params });
+    return response.data;
+  },
+  getRegistrationDetail: async (id) => {
+    const response = await api.get(`/gov/vendors/registrations/${id}`);
+    return response.data;
+  },
+  acceptRegistration: async (id, data) => {
+    const response = await api.post(`/gov/vendors/registrations/${id}/accept`, data);
+    return response.data;
+  },
+  rejectRegistration: async (id, data) => {
+    const response = await api.post(`/gov/vendors/registrations/${id}/reject`, data);
+    return response.data;
+  },
+};
+
 export default api;
