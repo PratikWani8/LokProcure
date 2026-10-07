@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { UserCheck, ArrowRight, Lock, Mail, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { UserCheck, ArrowRight, Lock, Mail, AlertCircle, CheckCircle2, Building2, ShieldCheck } from 'lucide-react';
 import { authAPI } from '../api';
+import VendorRegistrationModal from './VendorRegistrationModal';
 
 const DEMO_PERSONAS = [
   {
@@ -64,6 +65,7 @@ export default function Login({ onLoginSuccess }) {
   const [password, setPassword] = useState('admin123');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isRegisterOpen, setIsRegisterOpen] = useState(false);
 
   const handleLogin = async (e, customEmail, customPassword) => {
     if (e) e.preventDefault();
@@ -246,6 +248,18 @@ export default function Login({ onLoginSuccess }) {
                   )}
                 </button>
               </form>
+
+              {/* Vendor Registration Button */}
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsRegisterOpen(true)}
+                  className="w-full py-2 px-3 rounded-lg border border-blue-600/30 bg-blue-50/70 hover:bg-blue-100/80 text-blue-900 text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-2xs cursor-pointer"
+                >
+                  <Building2 className="w-3.5 h-3.5 text-blue-600" />
+                  <span>New Supplier? Register as Vendor</span>
+                </button>
+              </div>
             </div>
 
             {/* Bottom Status Row */}
@@ -330,6 +344,15 @@ export default function Login({ onLoginSuccess }) {
         </div>
 
       </div>
+
+      {/* Vendor Registration Modal */}
+      <VendorRegistrationModal
+        isOpen={isRegisterOpen}
+        onClose={() => setIsRegisterOpen(false)}
+        onRegistered={(reg) => {
+          setEmail(reg.email);
+        }}
+      />
     </div>
   );
 }
